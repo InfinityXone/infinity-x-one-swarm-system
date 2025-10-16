@@ -1,0 +1,5 @@
+fastapi==0.115.4
+uvicorn==0.30.6
+google-cloud-firestore==2.16.0
+google-cloud-secret-manager==2.20.2
+eth-account==0.11.3
