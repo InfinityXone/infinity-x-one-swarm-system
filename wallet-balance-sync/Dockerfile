@@ -1,9 +1,22 @@
+# Use a Python 3.11 slim image
 FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED 1
+ENV PORT 8080
+
+# Create and set the working directory
 WORKDIR /app
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
-COPY requirements.txt .
+
+# Copy the requirements and install dependencies
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
-COPY main.py .
-ENV PORT=8080
-CMD ["uvicorn","main:app","--host=0.0.0.0","--port=8080"]
+
+# Copy the application code
+COPY . /app/
+
+# Expose the port FastAPI will run on
+EXPOSE 8080
+
+# Run the app using Uvicorn
+CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8080"]

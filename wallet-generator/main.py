@@ -29,4 +29,3 @@ async def generate_wallets(request: WalletRequest):
 @app.get("/health")
 async def health_check():
     return {"ok": True, "service": "wallet-generator"}
-

@@ -1,0 +1,45 @@
+from web3 import Web3
+from eth_account import Account
+from mnemonic import Mnemonic
+import json
+from google.cloud import firestore
+
+# Initialize Web3
+w3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID'))
+
+# Firestore client
+db = firestore.Client()
+
+def generate_wallets(mnemonic, shadows_per_wallet):
+    accounts = []
+    # Generate base wallet
+    base_account = Account.from_mnemonic(mnemonic)
+    accounts.append({
+        'address': base_account.address,
+        'private_key': base_account.privateKey.hex()
+    })
+
+    # Generate shadow wallets
+    shadow_accounts = []
+    for i in range(shadows_per_wallet):
+        shadow_account = Account.from_mnemonic(mnemonic, account_path=f"m/44'/60'/0'/0/{i}")
+        shadow_accounts.append({
+            'address': shadow_account.address,
+            'private_key': shadow_account.privateKey.hex()
+        })
+
+    return accounts, shadow_accounts
+
+def create_and_store_wallets(num_wallets, mnemonic, shadows_per_wallet):
+    all_wallets = []
+    for _ in range(num_wallets):
+        wallets, shadows = generate_wallets(mnemonic, shadows_per_wallet)
+        all_wallets.append({'wallet': wallets, 'shadows': shadows})
+
+    # Store in Firestore (or database of choice)
+    for wallet_set in all_wallets:
+        db.collection('wallets').add(wallet_set)
+
+# Call the function to generate and store wallets
+mnemonic_phrase = "correct horse battery staple correct horse battery staple"  # Example mnemonic
+create_and_store_wallets(5, mnemonic_phrase, 2)
